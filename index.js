@@ -1,5 +1,5 @@
 //=====================Part 1================================
-let mainEL = document.querySelector("main");
+const mainEL = document.querySelector("main");
 mainEL.style.backgroundColor = "var(--main-bg)";
 mainEL.innerHTML = "<h1>DOM Manipulation</h1>";
 mainEL.classList.add("flex-ctr");
@@ -12,7 +12,7 @@ topMenuEl.classList.add("flex-around");
 
 //=====================Part 3================================
 
-// Menu data structure
+// Old menu data structure
 /*var menuLinks = [
   { text: "about", href: "/about" },
   { text: "catalog", href: "/catalog" },
@@ -20,7 +20,7 @@ topMenuEl.classList.add("flex-around");
   { text: "account", href: "/account" },
 ];*/
 
-//updated menu
+//updated menu data structure
 var menuLinks = [
   { text: "about", href: "/about" },
   {
@@ -55,7 +55,7 @@ var menuLinks = [
 /*
   menuLinks.forEach(link=>){
   const a= document.createElement('a')}
-  */ 
+  */
 
 menuLinks.forEach(function (link) {
   var a = document.createElement("a");
@@ -64,11 +64,13 @@ menuLinks.forEach(function (link) {
   topMenuEl.appendChild(a);
 });
 
+const topMenuLinks = topMenuEl.querySelectorAll("a");
+
 //select nav id and store it in variable
 const subMenuEl = document.querySelector("#sub-menu");
 
 //set the height
-subMenuEl.style.height = '100%';
+subMenuEl.style.height = "100%";
 
 //set the background color
 subMenuEl.style.backgroundColor = "var(--sub-menu-bg)";
@@ -81,80 +83,58 @@ subMenuEl.setAttribute("class", "flex-around");
 subMenuEl.style.position = "absolute";
 
 //set the top property
-subMenuEl.style.top = '0';
-
-//select the nav id=top-menu
-//const topMenuEl = document.querySelector("#top-menu");
-
-//select all a elements inside the topMenuEl
-const topMenuLinks = topMenuEl.querySelectorAll("a");
+subMenuEl.style.top = "-100%";
 
 //add an event listener to topMenuEl
 //(e) or (event) the same
-topMenuEl.addEventListener("click",function (e) {
-    e.preventDefault(); //to prevent the default behavior of 'a' links
+topMenuEl.addEventListener("click", function (e) {
+  e.preventDefault(); //to prevent the default behavior of 'a' links
+  const clickedEl = e.target;
+  if (clickedEl.tagName !== "A") return;
 
-    const clickedEl = e.target;
-    if (clickedEl.tagName !== "A") return;
+  //toggle the active class on the clicked element
+  topMenuLinks.forEach((link) => link.classList.remove("active"));
+  //add the active class to the clicked link
+  clickedEl.classList.add("active");
 
-    console.log(clickedEl.textContent);
+  //find the link object in the menulinks array that matches the clicked a
+  const linkObj = menuLinks.find((link) => link.text === clickedEl.textContent);
 
-    //toggle the active class on the clicked element
-    if (!clickedEl.classList.contains("active")) {
-      //remove all acrtive class fro all top menu links
-      topMenuLinks.forEach((link) => link.classList.remove("active"));
-      //add the active class to the clicked link
-      clickedEl.classList.add("active");
-    } else {
-      //if the clicked link was already active remove the active class
-      clickedEl.classList.remove("active");
-    }
+  //if the clicked link has sublinks build the submenu
+  if (linkObj && linkObj.subLinks) {
+    buildSubmenu(linkObj.subLinks);
+    //setting its top property
+    subMenuEl.style.top = "3rem";
+  } else {
+    //hide the submenu if there are no sublinks
+    subMenuEl.style.top = "-100%";
+  }
 
-    //find the link object in the menulinks array that matches the clicked a
-    const linkObj = menuLinks.find(
-      (link) => link.text === clickedEl.textContent
-    );
-
-    //if theb cklicked ink has sublinks build the submenu
-    if (linkObj && linkObj.subLinks) {
-      buildSubmenu(linkObj.subLinks);
-      //show the submenu by setting its top property to 100%
-      subMenuEl.style.top = "100%";
-    } else {
-      //hide the submenu if there are no sublinks
-      subMenuEl.style.top = "0";
-    }
-  });
-
-//add an event listener that will handle clicks on its children
-subMenuEl.addEventListener('click', function(e) {
-    e.preventDefault();
-
-    const clickedEl = e.target;
-    if (clickedEl.tagName !== 'A') return;
-
-    //log the content
-    console.log(clickedEl.textContent);
-
-    //update the h1 
+  if (!linkObj || !linkObj.subLinks) {
     mainEL.innerHTML = `<h1>${clickedEl.textContent}</h1>`;
-
-    //hide the sub menu 
-    subMenuEl.style.top = '0';
-
-    //remove the active class 
-    topMenuLinks.forEach((link) => link.classList.remove('active'))
+  }
 });
 
-function buildSubmenu(subLinks){
+//add an event listener that will handle clicks on its children
+subMenuEl.addEventListener("click", function (e) {
+  e.preventDefault();
+  const clickedEl = e.target;
+  if (clickedEl.tagName !== "A") return;
 
-    subMenuEl.innerHTML = '';
+  //update the h1
+  mainEL.innerHTML = `<h1>${clickedEl.textContent}</h1>`;
+  //hide the sub menu
+  subMenuEl.style.top = "-100%";
+  //remove the active class
+  topMenuLinks.forEach((link) => link.classList.remove("active"));
+});
 
-    subLinks.forEach(function (subLink) {
-        var a = document.createElement ('a');
-        a.setAttribute('href', subLink.href);
-        a.textContent = subLink.text;
-        subMenuEl.appendChild(a);
-    });
+function buildSubmenu(subLinks) {
+  subMenuEl.innerHTML = "";
+  subLinks.forEach(function (subLink) {
+    var a = document.createElement("a");
+    a.setAttribute("href", subLink.href);
+    a.textContent = subLink.text;
+    subMenuEl.appendChild(a);
+  });
 }
-
